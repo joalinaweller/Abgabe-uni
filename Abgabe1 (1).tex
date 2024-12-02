@@ -1,0 +1,139 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[ngerman]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{soul}
+
+\title{Abgabe 1 für Computergestützte Methoden}
+\author{Gruppe (32)\\(Joalina Weller 4369497, Carla Bruchmann 3213430, Jordi Olbrich 4219996)}
+\date{(2.Dezember 2024)}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\section{Der zentrale Grenzwertsatz}
+
+Der zentrale Grenzwertsatz (ZGS) ist ein fundamentales Resultat der Wahrscheinlichkeitstheorie, das die Verteilung von Summen unabhängiger, identisch verteilter (i.i.d.) Zufallsvariablen (ZV) beschreibt. Er besagt, dass unter bestimmten Voraussetzungen die Summe einer großen Anzahl solcher ZV annähernd normalverteilt ist, unabhängig von der Verteilung der einzelnen ZV. Dies ist besonders nützlich, da die Normalverteilung gut untersucht und mathematisch handhabbar ist.
+
+\subsection{Aussage}
+
+Sei \(X_1, X_2, \dots, X_n\) eine Folge von i.i.d. ZV mit dem Erwartungswert \(\mu = \mathbb{E}(X_i)\) und der Varianz \(\sigma^2 = \text{Var}(X_i)\), wobei \(0 < \sigma^2 < \infty\) gelte. Dann konvergiert die standardisierte Summe \(Z_n\) dieser ZV für \(n \to \infty\) in Verteilung gegen eine Standardnormalverteilung:\footnote{Der zentrale Grenzwertsatz hat verschiedene Verallgemeinerungen. Eine davon ist der Lindeberg-Feller-Zentrale-Grenzwertsatz [\cite{Klenke2013}, Seite 328], der schwächere Bedingungen an die Unabhängigkeit und die identische Verteilung der ZV stellt.}
+
+\[
+Z_n = \frac{\sum_{i=1}^n X_i - n\mu}{\sigma \sqrt{n}} \overset{d}{\to} \mathcal{N}(0,1).
+\]
+
+Das bedeutet, dass für große \(n\) die Summe der ZV näherungsweise normalverteilt ist mit Erwartungswert \(n\mu\) und Varianz \(n\sigma^2\):
+
+\[
+\sum_{i=1}^n X_i \sim \mathcal{N}(n\mu, n\sigma^2).
+\]
+
+\subsection{Erklärung der Standardisierung}
+
+Um die Summe der ZV in eine Standardnormalverteilung zu transformieren, subtrahiert man den Erwartungswert \(n\mu\) und teilt durch die Standardabweichung \(\sigma \sqrt{n}\). Dies führt zu der obigen Formel (1). Die Darstellung (2) ist für \(n \to \infty\) nicht wohldefiniert.
+
+\subsection{Anwendungen}
+
+Der ZGS wird in vielen Bereichen der Statistik und der Wahrscheinlichkeitstheorie angewendet. Typische Beispiele sind:
+\begin{itemize}
+    \item (Mittelwert bei Stichproben)
+    \item (Hypothesentests)
+\end{itemize}
+
+\newpage
+
+\section{Bearbeitung zur Aufgabe 1}
+\subsection{Datenverarbeitung}
+\subsubsection{1)}
+Wir haben erkannt, dass die Daten in der CSV Datei durch Kommata oder Semikolons getrennt sind. Außerdem hat jede Gruppe 1-2 Stationen, an denen die Messungen vorgenommen werden. Diese werden durch ein \& getrennt. Darüber hinaus gibt es Werte die in den Daten unbekannt sind und somit durch NA angegeben werden.
+
+\subsubsection{2)}
+Wir importierten die Daten in Excel durch Öffnen einer leeren Arbeitsmappe, führten Import csv aus und trennten die Trennzeichen, sodass wir alle Daten separat in Spalten hatten.
+
+\subsubsection{3)}
+Wir haben die höchste mittlere Temperatur berechnet, indem wir erst die Datentypen der Temperaturen auf ganze Zahlen geändert haben und dann in einer Zelle $$=((max(J:J)-32)*(5/9))$$
+ausgeführt haben. Das Ergebnis ist $28,\overline{3}^\circ c$
+
+
+\subsection{Datenhaltung}
+\subsubsection{2)}
+Groups(\ul{group\_id}, group\_name)\\
+Stations(\ul{station\_id}, station\_name)\\
+Groups\_Stations(\ul{group\_id}, \ul{station\_id})\\
+Weather(\ul{wether\_id}, \ul{group\_id}, date, day\_of\_year, day\_of\_week, month\_of\_year, precipitation, windspeed, min\_temp, avg\_temp, max\_temp, count)\newline
+
+Den Datensatz in der Exceltabelle haben wir in weitere Tabellen zerlegt, welche eine Beziehung zueinander haben. Jede Tabelle hat eine ID und Attribute.Das Schema ist in erster und zweiter Normalform. \\
+Theoretisch, könnte man die ersten 2 Tabellen auslassen, falls man nicht plant andere Stationen oder Gruppen mit dem selben Namen oder einem Namen der keine Zahl ist, einzufügen und als Fremdschlüßel in Groups\_Stations einfach die Namen verwenden.
+
+
+\subsubsection{3)}
+\begin{verbatim}
+    
+
+CREATE TABLE Groups (
+    group_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Stations (
+    station_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    station_name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Group_Station (
+    group_id INTEGER NOT NULL,
+    station_id INTEGER NOT NULL,
+    PRIMARY KEY (group_id, station_id),
+    FOREIGN KEY (group_id) REFERENCES Groups(group_id),
+    FOREIGN KEY (station_id) REFERENCES Stations(station_id)
+);
+
+CREATE TABLE Weather (
+    weather_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_id INTEGER NOT NULL,
+    date DATE NOT NULL,
+    day_of_year INTEGER,
+    day_of_week INTEGER,
+    month_of_year INTEGER,
+    precipitation DECIMAL(5,2),
+    windspeed DECIMAL(5,2),
+    min_temperature DECIMAL(5,2),
+    average_temperature DECIMAL(5,2),
+    max_temperature DECIMAL(5,2),
+    count INTEGER,
+    FOREIGN KEY (group_id) REFERENCES Groups(group_id)
+);
+\end{verbatim}
+
+\subsubsection{4)}
+Daten bereinigen und dann als csv exportieren, um die Daten in eine Tabelle importieren zu können.
+Außerdem haben wir die Spalte mit den Stationen am Trennzeichen \& in zwei Spalten geteilt.
+\subsubsection{5)}
+\begin{verbatim}
+    SELECT 
+    MAX(average_temperature) AS max_average_temperature_fahrenheit,
+    (MAX(average_temperature) - 32) * 5.0 / 9.0 AS max_average_temperature_celsius
+    FROM Weather;
+
+    Ausgabe:
+    max_average_temperature_fahrenheit: 83
+    max_average_temperature_celsius: 28.333333333333332
+\end{verbatim}
+\newpage
+\section*{Literatur}
+
+\begin{itemize}
+    \item[1] Achim Klenke. \textit{Wahrscheinlichkeitstheorie}. Springer, 3. Edition, 2013.
+\end{itemize}
+
+\end{document}
+
